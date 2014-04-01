@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <string.h>
 
+#define MAXPATHSIZE 256
 
 char file_type(mode_t mode);
 int dir_traversal(char* input);
@@ -23,6 +24,7 @@ char* file_perms(mode_t mode);
   input: Start dir
   function: Creates a file that holds stat info for each file on file system
   output: success or fail
+  Author: Erik Steggall
 
 */
 int main(int c, char* argv[]){
@@ -30,7 +32,7 @@ int main(int c, char* argv[]){
        size;
    char* buf;
 
-   buf = (char*) calloc(64, sizeof(char));
+   buf = (char*) calloc(MAXPATHSIZE, sizeof(char));
 
    if(buf == NULL){
       perror("Failed to allocate memory\n");
@@ -71,6 +73,7 @@ int main(int c, char* argv[]){
 
   if(buf != NULL){
      free(buf);
+     buf = NULL;
   }
 
    return 0;
@@ -92,7 +95,7 @@ int dir_traversal(char* buf){
    int size,
        ret;
 
-   name_buf = (char*) calloc(64, sizeof(char));
+   name_buf = (char*) calloc(MAXPATHSIZE, sizeof(char));
    if(name_buf == NULL){
       perror("Failed to allocate memory\n");
    }
@@ -121,6 +124,7 @@ int dir_traversal(char* buf){
        name_buf[size] = '\0';
        strcat(name_buf, "/");
        strcat(name_buf, dirptr->d_name);
+       printf("name buf = %s\n", name_buf);
        ret = stat_call(name_buf, dirptr);
 
        /* Open up stat buffer for dir entry */
@@ -138,9 +142,11 @@ int dir_traversal(char* buf){
    
    if(dirptr != NULL){
       free(dirptr);
+      dirptr = NULL;
    }
    if(name_buf != NULL){
       free(name_buf);
+      name_buf = NULL;
    }
 
    return 0 ;
@@ -164,12 +170,11 @@ int stat_call(char* name, struct dirent* dirptr){
     if (lstat(name, &stat_buf) < 0){
         perror("lstat() failed\n");
     }
-//    user = getpwuid(stat_buf.st_uid);
-//    group = getgrgid(stat_buf.st_gid);
-//    time = localtime(&stat_buf.st_mtime);
-//    strftime(time_buf, sizeof(time_buf), "%d.%m.%Y %H:%M:%S", time);
-//    printf("%s %d %s %s %s %s\n",file_perms(stat_buf.st_mode), (int)stat_buf.st_nlink, user->pw_name, group->gr_name, time_buf, dirptr->d_name);
-    printf("name = %s\n", dirptr->d_name);
+    user = getpwuid(stat_buf.st_uid);
+    group = getgrgid(stat_buf.st_gid);
+    time = localtime(&stat_buf.st_mtime);
+    strftime(time_buf, sizeof(time_buf), "%d.%m.%Y %H:%M:%S", time);
+    printf("%s %d %s %s %s %s\n",file_perms(stat_buf.st_mode), (int)stat_buf.st_nlink, user->pw_name, group->gr_name, time_buf, dirptr->d_name);
     
 }
 
