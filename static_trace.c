@@ -32,6 +32,10 @@ int main(int c, char* argv[]){
 
    buf = (char*) calloc(64, sizeof(char));
 
+   if(buf == NULL){
+      perror("Failed to allocate memory\n");
+   }
+
    if(argv[1] != NULL){
      size = strlen(argv[1]);
      strncpy(buf, argv[1], size);
@@ -65,7 +69,9 @@ int main(int c, char* argv[]){
 
    // Close file
 
-   free(buf);
+  if(buf != NULL){
+     free(buf);
+  }
 
    return 0;
 }
@@ -87,8 +93,14 @@ int dir_traversal(char* buf){
        ret;
 
    name_buf = (char*) calloc(64, sizeof(char));
+   if(name_buf == NULL){
+      perror("Failed to allocate memory\n");
+   }
 
    dirptr = malloc(sizeof(struct dirent));
+   if(dirptr == NULL){
+      perror("Failed to allocate memory\n");
+   }
    
    if((basedir = opendir(buf)) == NULL){
        perror("Failed to open home dir");
@@ -124,8 +136,12 @@ int dir_traversal(char* buf){
    }
    closedir(basedir);
    
-   free(dirptr);
-   free(name_buf);
+   if(dirptr != NULL){
+      free(dirptr);
+   }
+   if(name_buf != NULL){
+      free(name_buf);
+   }
 
    return 0 ;
 
